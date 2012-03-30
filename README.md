@@ -1,11 +1,13 @@
 # I18n::Airbrake
 
-* translates known keys normally
-* translates defaults normally
-* notifies airbrake in production environment
-* titleizes the key in production environment
-* raises the error in development environment
-* raises the error in test environment
+* when the translation can be found
+  * translates known keys normally
+  * uses the default normally
+* when the translation cannot be found
+  * notifies airbrake in production environment
+  * titleizes the key in production environment
+  * raises the error in development environment
+  * raises the error in test environment
 
 (straight from the specs)
 
