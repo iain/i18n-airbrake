@@ -15,8 +15,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = I18n::Airbrake::VERSION
 
-  gem.add_dependency "i18n", "~> 0.6.0"
-  gem.add_dependency "airbrake", "~> 3.0.9"
+  gem.add_dependency "i18n", "~> 0.6"
+  gem.add_dependency "airbrake", "~> 3.0"
 
   gem.add_development_dependency "rspec", "~> 2.9"
 
