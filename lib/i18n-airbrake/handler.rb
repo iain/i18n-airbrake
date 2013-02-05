@@ -13,7 +13,10 @@ module I18n
         if fail?
           fail exception
         end
-        @key.to_s
+        key = @key.to_s
+        key.respond_to?(:titleize) ?
+          key.titleize :
+          key
       end
 
       def exception

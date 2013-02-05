@@ -58,15 +58,23 @@ describe I18n::Airbrake do
     context "production environment" do
       let(:env) { 'production' }
 
+      it "does not titleize the key when the string does not responds_to(:titleize)" do
+        ::Airbrake.stub(:notify)
+        I18n.t(:unknownMonkeyBars).should == 'unknownMonkeyBars'
+        ::Airbrake.unstub(:notify)
+      end
+
+      it "titleizes the key when the string responds_to(:titleize)" do
+        ::Airbrake.stub(:notify)
+        String.any_instance.stub(:titleize).and_return('string is titleized!')
+        I18n.t(:unknownMonkeyBars).should == 'string is titleized!'
+        String.any_instance.unstub(:titleize)
+        ::Airbrake.unstub(:notify)
+      end
+
       it "notifies airbrake" do
         ::Airbrake.should_receive(:notify).with(an_instance_of(I18n::MissingTranslationData))
         I18n.t(:unknown)
-      end
-
-      it "returns the key" do
-        ::Airbrake.stub(:notify)
-        I18n.t(:unknown).should == "unknown"
-        ::Airbrake.unstub(:notify)
       end
 
       it "does not raise the error" do
