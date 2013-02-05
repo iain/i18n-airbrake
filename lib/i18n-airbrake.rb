@@ -15,7 +15,9 @@ module I18n
       #
       # @example
       #   Airbrake.configure do |config|
-      #     config.fail_when = Proc.new { |handler| handler }
+      #     config.fail_when = Proc.new do |handler|
+      #       handler.exception.is_a?(MissingTranslation) && handler.key.to_s != 'i18n.plural.rule'
+      #     end
       #     config.notify_when  = false
       #   end
       def configure(silent = false)

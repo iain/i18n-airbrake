@@ -5,7 +5,7 @@
   * uses the default normally
 * when the translation cannot be found
   * notifies airbrake in production environment
-  * titleizes the key in production environment
+  * titleizes the key in production environment (if string responds_to(:titleize)
   * raises the error in development environment
   * raises the error in test environment
 
@@ -25,9 +25,49 @@ And then execute:
 $ bundle
 ```
 
+## Configuration
+
+The `handler` passed to the Proc is the instance of I18n::Airbrake::Handler that is handling the current invocation of I18n.translate
+
+### Default
+
+``` ruby
+Airbrake.configure do |config|
+  config.fail_when    = Proc.new do |handler|
+    %w( development test ).include?(Rails.env)
+  end
+  config.notify_when  = nil
+end
+```
+
+### Customization
+
+``` ruby
+I18n::Airbrake.configure do |config|
+  config.fail_when = Proc.new do |handler|
+    # Allow fallback to default plural rules
+    handler.exception.is_a?(MissingTranslation) && handler.key.to_s != 'i18n.plural.rule'
+  end
+
+  config.notify_when = Proc.new do |handler|
+    # Do not Notify in development or test
+    %w( development test ).include?(Rails.env)
+  end
+end
+```
+
 ## Usage
 
-That should be it. There is no configuration (yet).
+That should be it.
+
+## Compatibility
+
+Reported to be compatible with (and report missing translation errors in):
+
+| other gem | version | since I18n::Airbrake version |
+|---------- | ------- | ---------------------------- |
+| rails     | 3.2.11  | 0.0.2 |
+| rails_admin | 0.4.3 | master@HEAD |
 
 ## Contributing
 

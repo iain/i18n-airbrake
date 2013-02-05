@@ -1,6 +1,8 @@
 module I18n
   module Airbrake
-    # Used to set up and modify settings for the notifier.
+    # Used to set up and modify settings for the I18n::Airbrake notifier.
+    # Allows for custom exception handling and notification of translation errors
+    # See: http://edgeguides.rubyonrails.org/i18n.html
     class Configuration
 
       OPTIONS = [:fail_when, :notify_when].freeze
