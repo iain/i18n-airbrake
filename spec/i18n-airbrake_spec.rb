@@ -3,7 +3,6 @@ require 'airbrake'
 
 describe I18n::Airbrake do
 
-  let(:env) { stub "env", :development? => false, :test? => false }
   let(:translation) { "This is a known value" }
 
   module Rails
@@ -12,6 +11,9 @@ describe I18n::Airbrake do
   before do
     I18n.backend.store_translations :en, :known => translation
     Rails.stub(:env) { env }
+    ::Airbrake.configure do |config|
+      config.async = false
+    end
   end
 
   context "when the translation can be found" do
@@ -27,29 +29,49 @@ describe I18n::Airbrake do
   end
 
   context "when the translation cannot be found" do
+    context "development environment" do
+      let(:env) { 'development' }
 
-    it "notifies airbrake in production environment" do
-      ::Airbrake.should_receive(:notify).with(an_instance_of(I18n::MissingTranslationData))
-      I18n.t(:unknown)
+      it "does not notify airbrake" do
+        ::Airbrake.should_not_receive(:notify)
+        expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
+      end
+
+      it "raises the error" do
+        expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
+        ::Airbrake.should_not_receive(:notify)
+      end
     end
+    context "test environment" do
+      let(:env) { 'test' }
 
-    it "titleizes the key in production environment" do
-      ::Airbrake.stub(:notify)
-      I18n.t(:unknown).should == "Unknown"
+      it "does not notify airbrake" do
+        ::Airbrake.should_not_receive(:notify)
+        expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
+      end
+
+      it "raises the error" do
+        expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
+        ::Airbrake.should_not_receive(:notify)
+      end
     end
+    context "production environment" do
+      let(:env) { 'production' }
 
-    it "raises the error in development environment" do
-      Rails.env.stub(:development?) { true }
-      ::Airbrake.should_not_receive(:notify)
-      expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
+      it "notifies airbrake" do
+        ::Airbrake.should_receive(:notify).with(an_instance_of(I18n::MissingTranslationData))
+        I18n.t(:unknown)
+      end
+
+      it "returns the key" do
+        ::Airbrake.stub(:notify)
+        I18n.t(:unknown).should == "unknown"
+        ::Airbrake.unstub(:notify)
+      end
+
+      it "does not raise the error" do
+        expect { I18n.t(:unknown) }.to_not raise_error I18n::MissingTranslationData
+      end
     end
-
-    it "raises the error in test environment" do
-      Rails.env.stub(:test?) { true }
-      ::Airbrake.should_not_receive(:notify)
-      expect { I18n.t(:unknown) }.to raise_error I18n::MissingTranslationData
-    end
-
   end
-
 end
